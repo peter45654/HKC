@@ -1,0 +1,268 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+	<script src="https://d3js.org/d3.v3.min.js"></script>
+	 <script type="text/javascript" src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+    <!--==========Jslider=========-->
+
+	<link rel="stylesheet" href="jslider/css/jslider.css" type="text/css">
+	<link rel="stylesheet" href="jslider/css/jslider.blue.css" type="text/css">
+	<link rel="stylesheet" href="jslider/css/jslider.plastic.css" type="text/css">
+
+
+   <script type="text/javascript" src="jslider/js/jquery-1.7.1.js"></script>
+
+    <!-- bin/jquery.slider.min.js -->
+    <script type="text/javascript" src="jslider/js/jshashtable-2.1_src.js"></script>
+    <script type="text/javascript" src="jslider/js/jquery.numberformatter-1.2.3.js"></script>
+    <script type="text/javascript" src="jslider/js/tmpl.js"></script>
+    <script type="text/javascript" src="jslider/js/jquery.dependClass-0.1.js"></script>
+    <script type="text/javascript" src="jslider/js/draggable-0.1.js"></script>
+    <script type="text/javascript" src="jslider/js/jquery.slider.js"></script>
+	
+    <style type="text/css" media="screen">
+		body { background: #EEF0F7; }
+	   .layout { padding: 50px; font-family: Georgia, serif; }
+	   .layout-slider { margin-bottom: 60px; width: 50%; }
+	   .layout-slider-settings { font-size: 12px; padding-bottom: 10px; }
+	   .layout-slider-settings pre { font-family: Courier; }
+    </style>
+    <!--==========   ==========-->
+	
+	<title>ICDV</title>
+    <style type="text/css">
+    #map {
+        height: 100%;
+        width: 100%;
+    }
+    
+    html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="map" style="height:90%"></div>
+	<div id="dateScroll">
+		<div class="jslider">
+                <span style="display: inline-block; width: 400px; padding: 0 5px;">
+                    <input id="Slider" type="slider" name="area" value="1;12" 	 />
+                </span>
+		</div>
+	</div>
+    <script>
+
+
+    function initMap() {
+		/*--全域變數---*/
+		var gm = {}; //儲存google map的所有物品
+		var map = new google.maps.Map(document.getElementById("map"), {
+				zoom: 8,
+				center: {
+				lat: 23.58,
+				lng: 120.58
+				}
+		}); //新增一個google map  
+		gm.map = map;
+        var datas;
+		var CountryPointCount = {};
+      
+		var month;
+		if(peterMonth>10){
+			month=peterMonth;
+		}else{
+			month="0"+peterMonth;
+		}
+		d3.csv("空氣污染指標概況/空氣污染指標概況2013年"+"01"+"月份.csv",function (data) {
+            for(var i=0;i<data.length;i++){
+			 console.log(date);
+             //   console.log(data[i]);
+			//	console.log("看下面");
+			//	console.log(data[i]["良好(0－50)"]);
+				//console.log(data[i]["普通(51－100)"]);
+			//	console.log(data[i]["不良(101－199)"]);
+				var tempGood=data[i]["良好(0－50)"];
+				var tempnormal=data[i]["普通(51－100)"];
+				var tempBad=data[i]["不良(101－199)"];
+				var tempSum=data[i]["總計"];
+				
+				if(data[i]["良好(0－50)"]=='-'){tempGood=0};
+				if(data[i]["普通(51－100)"]=='-'){tempnormal=0};
+				if(data[i]["不良(101－199)"]=='-'){tempBad=0};
+				
+			//	console.log("看下面2");
+			//	console.log(tempGood);
+			//	console.log(tempnormal);
+			//	console.log(tempBad);
+			//	console.log(tempSum);
+				
+	
+                CountryPointCount[data[i]["統計區"]+"_Good_percent"] =tempGood/tempSum;
+				CountryPointCount[data[i]["統計區"]+"_Normal_percent"] =tempnormal/tempSum;
+				CountryPointCount[data[i]["統計區"]+"_Bad_percent"] =tempBad/tempSum;
+			}
+        });
+		
+	  	var color_good = d3.scale.linear().domain([0, 1]).range(["#ffffff", "#00ff00"]);
+		var color_normal = d3.scale.linear().domain([0, 1]).range(["#ffffff", "#ffff00"]);
+		var color_bad=d3.scale.linear().domain([0, 1]).range(["#ffffff", "#fe0000"]);
+        //console.log(color)
+
+        $.getJSON("topojson/counties.json", function(data) {
+        
+            var geoJsonObject = topojson.feature(data, data.objects.map)
+            map.data.addGeoJson(geoJsonObject);
+			//console.log("GeoJson : "+geoJsonObject)
+            map.data.setStyle(function(feature) {
+                var ascii = feature["f"]["name"];
+            //    console.log("test");
+             //   console.log(ascii);
+                var colors="#fff5f8";
+				
+			 // 	console.log(CountryPointCount[ascii+"_Good_percent"]);
+			  //  console.log(CountryPointCount[ascii+"_Normal_percent"]);
+            //    console.log(CountryPointCount[ascii+"_Bad_percent"]);
+				var good=CountryPointCount[ascii+"_Good_percent"];
+				var normal=CountryPointCount[ascii+"_Normal_percent"];
+				var bad=CountryPointCount[ascii+"_Bad_percent"];
+				var max=0;
+				if(good>max){max=good};
+				if(normal>max){max=normal};
+				if(bad>max){max=bad};
+				if(max==good){colors=color_good(good);}
+				if(max==normal){colors=color_normal(normal);}
+				if(max==bad){colors=color_bad(bad);}
+	      				
+                return {
+                    fillColor: colors,
+                    strokeWeight: 1,
+                    visible: true
+                };
+            });
+
+        });
+         //var i = 0;
+        var flag = true;
+    }
+	
+	function reDraw(peterMonth){
+			/*--全域變數---*/
+		var gm = {}; //儲存google map的所有物品
+		var map = new google.maps.Map(document.getElementById("map"), {
+				zoom: 8,
+				center: {
+				lat: 23.58,
+				lng: 120.58
+				}
+		}); //新增一個google map  
+		gm.map = map;
+		console.log("peterMonth :　"+peterMonth);
+		var CountryPointCount = {};
+		var month;
+		if(peterMonth>=10){
+			month=peterMonth;
+		}else{
+			month="0"+peterMonth;
+		}
+		console.log("month :　"+month);
+		d3.csv("空氣污染指標概況/空氣污染指標概況2013年"+month+"月份.csv",function (data) {
+            for(var i=0;i<data.length;i++){
+		
+				var tempGood=data[i]["良好(0－50)"];
+				var tempnormal=data[i]["普通(51－100)"];
+				var tempBad=data[i]["不良(101－199)"];
+				var tempSum=data[i]["總計"];
+				
+				if(data[i]["良好(0－50)"]=='-'){tempGood=0};
+				if(data[i]["普通(51－100)"]=='-'){tempnormal=0};
+				if(data[i]["不良(101－199)"]=='-'){tempBad=0};
+					
+                CountryPointCount[data[i]["統計區"]+"_Good_percent"] =tempGood/tempSum;
+				CountryPointCount[data[i]["統計區"]+"_Normal_percent"] =tempnormal/tempSum;
+				CountryPointCount[data[i]["統計區"]+"_Bad_percent"] =tempBad/tempSum;
+	
+			}
+        });
+		var color_good = d3.scale.linear().domain([0, 1]).range(["#ffffff", "#00ff00"]);
+		var color_normal = d3.scale.linear().domain([0, 1]).range(["#ffffff", "#ffff00"]);
+		var color_bad=d3.scale.linear().domain([0, 1]).range(["#ffffff", "#fe0000"]);
+        //console.log(color)
+
+        $.getJSON("topojson/counties.json", function(data) {
+        
+            var geoJsonObject = topojson.feature(data, data.objects.map)
+            map.data.addGeoJson(geoJsonObject);
+			//console.log("GeoJson : "+geoJsonObject)
+            map.data.setStyle(function(feature) {
+                var ascii = feature["f"]["name"]; 
+                var colors="#fff5f8";
+				
+				var good=CountryPointCount[ascii+"_Good_percent"];
+				var normal=CountryPointCount[ascii+"_Normal_percent"];
+				var bad=CountryPointCount[ascii+"_Bad_percent"];
+				var max=0;
+				if(good>max){max=good};
+				if(normal>max){max=normal};
+				if(bad>max){max=bad};
+				if(max==good){colors=color_good(good);}
+				if(max==normal){colors=color_normal(normal);}
+				if(max==bad){colors=color_bad(bad);}
+				
+                return {
+                    fillColor: colors,
+                    strokeWeight: 1,
+                    visible: true
+                };
+            });
+
+        });
+	}
+	
+	function clear(features){
+        for (var i = 0; i < features.length; i++){
+            map.data.remove(features[i]);
+        }
+
+    }
+	
+	
+    </script>
+	<script>
+	
+	
+	</script>
+	<script type="text/javascript" charset="utf-8">
+	var date;
+	var peterMonth;
+      var yearArr = ['2013-01', '2013-02', '2013-03', '2013-04', '2013-05', '2013-06', '2013-07', '2013-08', '2013-09', '2013-10', '2013-11', '2013-12'];
+      jQuery("#Slider").slider({ from: 1, to: 12, step: 1, dimension: '', scale:yearArr , limits: false, calculate: function( value ){
+        //var hours = Math.floor( value / 60 );
+        //var mins = ( value - hours*60 );
+         date = '2013-'+value;
+		 //reDraw(value);
+        return date;//(hours < 10 ? "0"+hours : hours) + ":" + ( mins == 0 ? "00" : mins );
+      },
+	  onstatechange(value){
+	  console.log(value);
+		reDraw(value.substr(2,2));
+	  }})
+        </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ1uQe2aMilKakSvizaGAj5NHG-U4qz4U&callback=initMap">
+
+    </script>
+</body>
+
+</html>

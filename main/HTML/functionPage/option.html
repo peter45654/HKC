@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src='d3.js'></script>
+    </head>
+    <script>
+        var filename = "酸雨日平均.csv";
+        
+        function init(){
+            var selection = document.getElementById('option');
+            selection.innerHTML='';
+            var tempstr;
+            d3.csv(filename,function(data){
+                console.log(Object.keys(data[0]));
+                for(var i in Object.keys(data[0])){
+                    //console.log(Object.keys(data[0])[i]);
+                    tempstr += '<option value="'+Object.keys(data[0])[i]+'">'+Object.keys(data[0])[i]+'</option>';
+                }
+                selection.innerHTML = tempstr;
+            });
+        }
+        window.addEventListener('load',init,false);
+    </script>
+<body>
+
+<p>Click the button to create a Slider Control.</p>
+
+    <select id="option"></select>
+
+</body>
+</html>

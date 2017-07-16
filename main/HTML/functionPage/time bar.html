@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" href="jslider/css/jslider.css" type="text/css">
+	    <link rel="stylesheet" href="jslider/css/jslider.blue.css" type="text/css">
+	    <link rel="stylesheet" href="jslider/css/jslider.plastic.css" type="text/css">
+   
+
+	   <script type="text/javascript" src="jslider/js/jquery-1.7.1.js"></script>
+	
+	   <!-- bin/jquery.slider.min.js -->
+	   <script type="text/javascript" src="jslider/js/jshashtable-2.1_src.js"></script>
+	   <script type="text/javascript" src="jslider/js/jquery.numberformatter-1.2.3.js"></script>
+	   <script type="text/javascript" src="jslider/js/tmpl.js"></script>
+	   <script type="text/javascript" src="jslider/js/jquery.dependClass-0.1.js"></script>
+	   <script type="text/javascript" src="jslider/js/draggable-0.1.js"></script>
+	   <script type="text/javascript" src="jslider/js/jquery.slider.js"></script>
+        
+       <style type="text/css" media="screen">
+	        body { background: #EEF0F7; }
+	       .layout { padding: 50px; font-family: Georgia, serif; }
+	       .layout-slider { margin-bottom: 60px; width: 50%; }
+	       .layout-slider-settings { font-size: 12px; padding-bottom: 10px; }
+	       .layout-slider-settings pre { font-family: Courier; }
+	   </style>
+        
+    </head>
+    
+    <body>
+        
+        <div class="layout-slider-settings">
+           
+        </div>
+            <div class="jslider">
+                <span style="display: inline-block; width: 400px; padding: 0 5px;">
+                    <input id="Slider" type="slider" name="area" value="1;12" />
+                </span>
+            </div>
+    
+    <script type="text/javascript" charset="utf-8">
+      var yearArr = ['2016-01', '2016-02', '2016-03', '2016-04', '2016-05', '2016-06', '2016-07', '2016-08', '2016-09', '2016-10', '2016-11', '2016-12'];
+      jQuery("#Slider").slider({ from: 1, to: 12, step: 1, dimension: '', scale:yearArr , limits: false, calculate: function( value ){
+        //var hours = Math.floor( value / 60 );
+        //var mins = ( value - hours*60 );
+        var date = '2016-'+value;
+          console.log(date);
+        return date;//(hours < 10 ? "0"+hours : hours) + ":" + ( mins == 0 ? "00" : mins );
+      }})
+        </script>
+        
+    </body>
+</html>
